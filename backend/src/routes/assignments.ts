@@ -100,9 +100,12 @@ assignmentsRouter.post(
     try {
       const assignment = await prisma.$transaction(async (tx) => {
         for (const item of items) {
-          const stock = await tx.stockItem.findUnique({ where: { productId: item.productId } });
+          const stock = await tx.stockItem.findUnique({
+            where: { productId: item.productId },
+            include: { product: { select: { name: true } } },
+          });
           if (!stock || stock.quantity < item.quantity) {
-            throw new InsufficientStockError(item.productId);
+            throw new InsufficientStockError(item.productId, stock?.product.name ?? item.productId, stock?.quantity ?? 0);
           }
         }
 
@@ -144,7 +147,9 @@ assignmentsRouter.post(
       res.status(201).json(serializeAssignment(details!));
     } catch (err) {
       if (err instanceof InsufficientStockError) {
-        return res.status(400).json({ error: `Depoda yeterli stok yok (ürün: ${err.productId})` });
+        return res
+          .status(400)
+          .json({ error: `Depoda yeterli stok yok: ${err.productName} (kalan: ${err.availableQuantity})` });
       }
       throw err;
     }
@@ -152,7 +157,11 @@ assignmentsRouter.post(
 );
 
 class InsufficientStockError extends Error {
-  constructor(public productId: string) {
+  constructor(
+    public productId: string,
+    public productName: string,
+    public availableQuantity: number
+  ) {
     super("Insufficient stock");
   }
 }

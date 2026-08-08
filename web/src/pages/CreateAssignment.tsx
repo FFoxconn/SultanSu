@@ -80,14 +80,8 @@ export function CreateAssignment() {
       navigate(`/zimmetler/${assignment.id}`);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Zimmet oluşturulamadı";
-      setError(
-        message.includes("stok")
-          ? "Depoda yeterli stok yok."
-          : message.includes("409")
-            ? "Bu kuryenin zaten açık bir zimmeti var."
-            : "Zimmet oluşturulamadı."
-      );
-      showToast("Zimmet oluşturulamadı.", "error");
+      setError(message);
+      showToast(message, "error");
     } finally {
       setSubmitting(false);
     }
