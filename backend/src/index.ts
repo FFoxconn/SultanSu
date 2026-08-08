@@ -7,6 +7,11 @@ import { stockRouter } from "./routes/stock";
 import { couriersRouter } from "./routes/couriers";
 import { assignmentsRouter } from "./routes/assignments";
 import { reportsRouter } from "./routes/reports";
+import { salesRouter } from "./routes/sales";
+import { returnsRouter } from "./routes/returns";
+import { usersRouter } from "./routes/users";
+import { auditLogsRouter } from "./routes/auditLogs";
+import { dashboardRouter } from "./routes/dashboard";
 
 export function createApp() {
   const app = express();
@@ -21,6 +26,11 @@ export function createApp() {
   app.use("/api/couriers", couriersRouter);
   app.use("/api/assignments", assignmentsRouter);
   app.use("/api/reports", reportsRouter);
+  app.use("/api/sales", salesRouter);
+  app.use("/api/returns", returnsRouter);
+  app.use("/api/users", usersRouter);
+  app.use("/api/audit-logs", auditLogsRouter);
+  app.use("/api/dashboard", dashboardRouter);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {

@@ -4,6 +4,8 @@ import { prisma } from "../lib/prisma";
 import { signToken, verifyPassword } from "../lib/auth";
 import { asyncHandler } from "../lib/asyncHandler";
 import { requireAuth } from "../middleware/auth";
+import { recordAudit } from "../lib/audit";
+import type { Role } from "../lib/roles";
 
 export const authRouter = Router();
 
@@ -30,7 +32,19 @@ authRouter.post(
       return res.status(401).json({ error: "Telefon veya şifre hatalı" });
     }
 
-    const token = signToken({ sub: user.id, role: user.role as "OWNER" | "COURIER", name: user.name });
+    const token = signToken({ sub: user.id, role: user.role as Role, name: user.name });
+
+    if (user.role !== "COURIER") {
+      await recordAudit(prisma, {
+        userId: user.id,
+        action: "auth.login",
+        entityType: "User",
+        entityId: user.id,
+        description: `${user.name} giriş yaptı`,
+        ip: req.ip,
+      });
+    }
+
     res.json({
       token,
       user: { id: user.id, name: user.name, phone: user.phone, role: user.role },

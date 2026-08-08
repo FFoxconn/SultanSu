@@ -3,43 +3,42 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { hashPassword } from "../lib/auth";
 import { asyncHandler } from "../lib/asyncHandler";
-import { requireAuth, requireRole } from "../middleware/auth";
+import { requireAuth, requirePermission } from "../middleware/auth";
 import { recordAudit } from "../lib/audit";
+import { ROLES } from "../lib/roles";
 
-export const couriersRouter = Router();
+export const usersRouter = Router();
 
-const MANAGE_ROLES = ["OWNER", "MANAGER"] as const;
-
-couriersRouter.get(
+usersRouter.get(
   "/",
   requireAuth,
-  requireRole(...MANAGE_ROLES, "WAREHOUSE"),
+  requirePermission("user.view"),
   asyncHandler(async (_req, res) => {
-    const couriers = await prisma.user.findMany({
-      where: { role: "COURIER" },
-      select: { id: true, name: true, phone: true, active: true, createdAt: true },
-      orderBy: { name: "asc" },
+    const users = await prisma.user.findMany({
+      select: { id: true, name: true, phone: true, role: true, active: true, createdAt: true },
+      orderBy: [{ role: "asc" }, { name: "asc" }],
     });
-    res.json(couriers);
+    res.json(users);
   })
 );
 
-const createCourierSchema = z.object({
+const createUserSchema = z.object({
   name: z.string().min(1),
   phone: z.string().min(1),
   password: z.string().min(4),
+  role: z.enum(ROLES as [string, ...string[]]),
 });
 
-couriersRouter.post(
+usersRouter.post(
   "/",
   requireAuth,
-  requireRole(...MANAGE_ROLES),
+  requirePermission("user.manage"),
   asyncHandler(async (req, res) => {
-    const parsed = createCourierSchema.safeParse(req.body);
+    const parsed = createUserSchema.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({ error: parsed.error.flatten() });
     }
-    const { name, phone, password } = parsed.data;
+    const { name, phone, password, role } = parsed.data;
 
     const existing = await prisma.user.findUnique({ where: { phone } });
     if (existing) {
@@ -47,22 +46,22 @@ couriersRouter.post(
     }
 
     const passwordHash = await hashPassword(password);
-    const courier = await prisma.$transaction(async (tx) => {
+    const user = await prisma.$transaction(async (tx) => {
       const created = await tx.user.create({
-        data: { name, phone, passwordHash, role: "COURIER" },
-        select: { id: true, name: true, phone: true, active: true, createdAt: true },
+        data: { name, phone, passwordHash, role },
+        select: { id: true, name: true, phone: true, role: true, active: true, createdAt: true },
       });
       await recordAudit(tx, {
         userId: req.user!.sub,
-        action: "courier.create",
+        action: "user.create",
         entityType: "User",
         entityId: created.id,
-        description: `"${created.name}" kurye olarak eklendi`,
+        description: `"${created.name}" kullanıcısı ${role} rolüyle oluşturuldu`,
         ip: req.ip,
       });
       return created;
     });
 
-    res.status(201).json(courier);
+    res.status(201).json(user);
   })
 );

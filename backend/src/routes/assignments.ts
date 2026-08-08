@@ -3,8 +3,12 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { asyncHandler } from "../lib/asyncHandler";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { applyStockMovement } from "../lib/stockMovement";
+import { recordAudit } from "../lib/audit";
 
 export const assignmentsRouter = Router();
+
+const MANAGE_ROLES = ["OWNER", "MANAGER"] as const;
 
 type AssignmentWithDetails = Awaited<ReturnType<typeof loadAssignmentDetails>>;
 
@@ -73,7 +77,7 @@ const createAssignmentSchema = z.object({
 assignmentsRouter.post(
   "/",
   requireAuth,
-  requireRole("OWNER"),
+  requireRole(...MANAGE_ROLES),
   asyncHandler(async (req, res) => {
     const parsed = createAssignmentSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -103,13 +107,16 @@ assignmentsRouter.post(
         }
 
         for (const item of items) {
-          await tx.stockItem.update({
-            where: { productId: item.productId },
-            data: { quantity: { decrement: item.quantity } },
+          await applyStockMovement(tx, {
+            productId: item.productId,
+            type: "ASSIGN",
+            delta: -item.quantity,
+            userId: req.user!.sub,
+            note: `${courier.name} adlı kuryeye zimmetlendi`,
           });
         }
 
-        return tx.assignment.create({
+        const created = await tx.assignment.create({
           data: {
             courierId,
             items: {
@@ -120,6 +127,17 @@ assignmentsRouter.post(
             },
           },
         });
+
+        await recordAudit(tx, {
+          userId: req.user!.sub,
+          action: "assignment.create",
+          entityType: "Assignment",
+          entityId: created.id,
+          description: `${courier.name} adlı kuryeye ${items.length} ürün kalemi zimmetlendi`,
+          ip: req.ip,
+        });
+
+        return created;
       });
 
       const details = await loadAssignmentDetails(assignment.id);
@@ -142,7 +160,7 @@ class InsufficientStockError extends Error {
 assignmentsRouter.get(
   "/",
   requireAuth,
-  requireRole("OWNER"),
+  requireRole(...MANAGE_ROLES, "WAREHOUSE"),
   asyncHandler(async (req, res) => {
     const { courierId, status, date } = req.query as Record<string, string | undefined>;
 
@@ -305,9 +323,12 @@ assignmentsRouter.post(
           });
 
           if (remaining > 0) {
-            await tx.stockItem.update({
-              where: { productId: item.productId },
-              data: { quantity: { increment: remaining } },
+            await applyStockMovement(tx, {
+              productId: item.productId,
+              type: "RETURN",
+              delta: remaining,
+              userId: req.user!.sub,
+              note: "Gün sonu iade",
             });
           }
         }
@@ -315,6 +336,15 @@ assignmentsRouter.post(
         await tx.assignment.update({
           where: { id: assignmentId },
           data: { status: "CLOSED", closedAt: new Date() },
+        });
+
+        await recordAudit(tx, {
+          userId: req.user!.sub,
+          action: "assignment.close",
+          entityType: "Assignment",
+          entityId: assignmentId,
+          description: "Zimmet kapatıldı, kalan ürünler depoya iade edildi",
+          ip: req.ip,
         });
       });
 

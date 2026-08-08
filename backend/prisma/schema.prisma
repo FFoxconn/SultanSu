@@ -8,9 +8,10 @@ datasource db {
 }
 
 // SQLite (dev) does not support native enums; role/status are validated
-// as string unions at the application boundary (see src/lib/auth.ts, zod schemas).
-// "OWNER" | "COURIER"      for User.role
-// "OPEN" | "CLOSED"        for Assignment.status
+// as string unions at the application boundary (see src/lib/roles.ts, src/lib/auth.ts, zod schemas).
+// "OWNER" | "MANAGER" | "WAREHOUSE" | "COURIER"   for User.role
+// "OPEN" | "CLOSED"                               for Assignment.status
+// "INITIAL" | "ASSIGN" | "RETURN" | "ADJUSTMENT"  for StockMovement.type
 
 model User {
   id           String   @id @default(cuid())
@@ -21,20 +22,26 @@ model User {
   active       Boolean  @default(true)
   createdAt    DateTime @default(now())
 
-  assignments Assignment[]
-  sales       Sale[]
+  assignments   Assignment[]
+  sales         Sale[]
+  stockMovements StockMovement[]
+  auditLogs     AuditLog[]
 }
 
 model Product {
-  id     String  @id @default(cuid())
-  name   String
-  unit   String  @default("adet")
-  price  Float
-  active Boolean @default(true)
+  id         String  @id @default(cuid())
+  name       String
+  unit       String  @default("adet")
+  price      Float
+  code       String? @unique
+  minStock   Int     @default(0)
+  costPrice  Float?
+  active     Boolean @default(true)
 
   stockItem        StockItem?
   assignmentItems  AssignmentItem[]
   sales            Sale[]
+  stockMovements   StockMovement[]
 }
 
 model StockItem {
@@ -83,4 +90,32 @@ model Sale {
   assignment Assignment @relation(fields: [assignmentId], references: [id])
   courier    User       @relation(fields: [courierId], references: [id])
   product    Product    @relation(fields: [productId], references: [id])
+}
+
+model StockMovement {
+  id          String   @id @default(cuid())
+  productId   String
+  type        String
+  quantity    Int
+  previousQty Int
+  newQty      Int
+  userId      String?
+  note        String?
+  createdAt   DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+  user    User?   @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  action      String
+  entityType  String?
+  entityId    String?
+  description String
+  ip          String?
+  createdAt   DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
 }

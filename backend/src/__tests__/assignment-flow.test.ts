@@ -13,6 +13,8 @@ let productId: string;
 let assignmentId: string;
 
 beforeAll(async () => {
+  await prisma.auditLog.deleteMany();
+  await prisma.stockMovement.deleteMany();
   await prisma.sale.deleteMany();
   await prisma.assignmentItem.deleteMany();
   await prisma.assignment.deleteMany();

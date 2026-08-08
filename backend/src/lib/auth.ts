@@ -1,11 +1,12 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import type { Role } from "./roles";
 
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
 
 export type TokenPayload = {
   sub: string;
-  role: "OWNER" | "COURIER";
+  role: Role;
   name: string;
 };
 
