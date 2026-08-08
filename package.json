@@ -1,0 +1,9 @@
+{
+  "name": "sultansu",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "web",
+    "mobile"
+  ]
+}

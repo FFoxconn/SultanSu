@@ -1,0 +1,281 @@
+:root {
+  --bg: #f4f6f8;
+  --surface: #ffffff;
+  --border: #e2e5e9;
+  --text: #1c2530;
+  --text-muted: #6b7683;
+  --primary: #1d6fd6;
+  --primary-dark: #14559f;
+  --danger: #d63b3b;
+  --success: #1f9254;
+  --radius: 10px;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+a {
+  color: var(--primary);
+}
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  background: #12233d;
+  color: #d9e4f2;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  flex-shrink: 0;
+}
+
+.sidebar h1 {
+  font-size: 1.2rem;
+  padding: 0 20px 16px;
+  margin: 0;
+  color: #fff;
+}
+
+.sidebar .subtitle {
+  padding: 0 20px 20px;
+  margin-top: -12px;
+  font-size: 0.75rem;
+  color: #90a5c2;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar nav a {
+  color: #c4d3e6;
+  text-decoration: none;
+  padding: 10px 20px;
+  font-size: 0.92rem;
+}
+
+.sidebar nav a.active,
+.sidebar nav a:hover {
+  background: #1d3a61;
+  color: #fff;
+}
+
+.sidebar .user-box {
+  margin-top: auto;
+  padding: 16px 20px 0;
+  border-top: 1px solid #23385c;
+}
+
+.sidebar .user-box button {
+  margin-top: 8px;
+  width: 100%;
+}
+
+.main {
+  flex: 1;
+  padding: 28px 36px;
+  max-width: 1100px;
+}
+
+.main h2 {
+  margin-top: 0;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.stat-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  min-width: 150px;
+  flex: 1;
+}
+
+.stat .label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.stat .value {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.92rem;
+}
+
+th {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge.open {
+  background: #fdecc8;
+  color: #8a5a00;
+}
+
+.badge.closed {
+  background: #dcf3e4;
+  color: #146c3a;
+}
+
+button,
+.btn {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 16px;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--primary-dark);
+}
+
+button.secondary {
+  background: #eef1f4;
+  color: var(--text);
+}
+
+button.secondary:hover {
+  background: #dfe4e9;
+}
+
+button.danger {
+  background: var(--danger);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.92rem;
+  background: #fff;
+  color: var(--text);
+}
+
+label {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  margin-top: 12px;
+}
+
+form .actions {
+  margin-top: 18px;
+  display: flex;
+  gap: 10px;
+}
+
+.error-text {
+  color: var(--danger);
+  font-size: 0.85rem;
+  margin-top: 10px;
+}
+
+.login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #12233d, #1d6fd6);
+}
+
+.login-box {
+  background: #fff;
+  padding: 32px 36px;
+  border-radius: 14px;
+  width: 340px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+.login-box h1 {
+  margin: 0 0 4px;
+  font-size: 1.4rem;
+}
+
+.login-box .subtitle {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 18px;
+}
+
+.item-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  margin-top: 10px;
+}
+
+.item-row .grow {
+  flex: 1;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.empty-state {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: 16px 0;
+}

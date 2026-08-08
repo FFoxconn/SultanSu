@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite (dev) does not support native enums; role/status are validated
+// as string unions at the application boundary (see src/lib/auth.ts, zod schemas).
+// "OWNER" | "COURIER"      for User.role
+// "OPEN" | "CLOSED"        for Assignment.status
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  phone        String   @unique
+  passwordHash String
+  role         String
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  assignments Assignment[]
+  sales       Sale[]
+}
+
+model Product {
+  id     String  @id @default(cuid())
+  name   String
+  unit   String  @default("adet")
+  price  Float
+  active Boolean @default(true)
+
+  stockItem        StockItem?
+  assignmentItems  AssignmentItem[]
+  sales            Sale[]
+}
+
+model StockItem {
+  id        String  @id @default(cuid())
+  productId String  @unique
+  quantity  Int     @default(0)
+
+  product Product @relation(fields: [productId], references: [id])
+}
+
+model Assignment {
+  id        String    @id @default(cuid())
+  courierId String
+  status    String    @default("OPEN")
+  createdAt DateTime  @default(now())
+  closedAt  DateTime?
+
+  courier User             @relation(fields: [courierId], references: [id])
+  items   AssignmentItem[]
+  sales   Sale[]
+}
+
+model AssignmentItem {
+  id                String  @id @default(cuid())
+  assignmentId      String
+  productId         String
+  quantityAssigned  Int
+  quantityReturned  Int?
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id])
+  product    Product    @relation(fields: [productId], references: [id])
+
+  @@unique([assignmentId, productId])
+}
+
+model Sale {
+  id           String   @id @default(cuid())
+  assignmentId String
+  courierId    String
+  productId    String
+  quantity     Int
+  unitPrice    Float
+  total        Float
+  createdAt    DateTime @default(now())
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id])
+  courier    User       @relation(fields: [courierId], references: [id])
+  product    Product    @relation(fields: [productId], references: [id])
+}
