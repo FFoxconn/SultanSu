@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { api, type StockMovement } from "../api/client";
 import { Card } from "../components/Card";
 import { Badge, type BadgeVariant } from "../components/Badge";
 import { DataTable, type Column } from "../components/DataTable";
+import { CloseIcon } from "../components/icons";
 
 const MOVEMENT_LABELS: Record<string, string> = {
   INITIAL: "Başlangıç Stoğu",
@@ -19,15 +21,31 @@ const MOVEMENT_VARIANT: Record<string, BadgeVariant> = {
 };
 
 export function StockMovements() {
+  const [searchParams] = useSearchParams();
+  const productId = searchParams.get("productId") ?? undefined;
+
   const [movements, setMovements] = useState<StockMovement[]>([]);
+  const [filteredProductName, setFilteredProductName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!productId) {
+      setFilteredProductName(null);
+      return;
+    }
     api
-      .stockMovements()
+      .product(productId)
+      .then((p) => setFilteredProductName(p.name))
+      .catch(() => setFilteredProductName(null));
+  }, [productId]);
+
+  useEffect(() => {
+    setLoading(true);
+    api
+      .stockMovements({ productId })
       .then(setMovements)
       .finally(() => setLoading(false));
-  }, []);
+  }, [productId]);
 
   const columns: Column<StockMovement>[] = [
     {
@@ -70,6 +88,16 @@ export function StockMovements() {
     <div>
       <h2>Stok Hareketleri</h2>
       <p className="muted">Zimmet, iade ve ürün oluşturma sırasında otomatik oluşan tüm depo stok hareketleri.</p>
+
+      {productId && (
+        <div className="filter-chip">
+          Filtre: {filteredProductName ?? "..."}
+          <Link to="/stok-hareketleri" className="filter-chip__remove" aria-label="Filtreyi kaldır">
+            <CloseIcon size={12} />
+          </Link>
+        </div>
+      )}
+
       <Card>
         <DataTable
           columns={columns}
@@ -78,7 +106,7 @@ export function StockMovements() {
           loading={loading}
           searchPlaceholder="Ürün veya kullanıcı ara..."
           exportFilename="stok-hareketleri"
-          emptyMessage="Henüz stok hareketi yok."
+          emptyMessage={productId ? "Bu ürün için stok hareketi yok." : "Henüz stok hareketi yok."}
         />
       </Card>
     </div>

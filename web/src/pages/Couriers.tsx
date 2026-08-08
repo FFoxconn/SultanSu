@@ -6,9 +6,11 @@ import { hasPermission } from "../lib/permissions";
 import { Card } from "../components/Card";
 import { Button } from "../components/Button";
 import { Badge } from "../components/Badge";
+import { Modal } from "../components/Modal";
 import { DataTable, type Column } from "../components/DataTable";
 import { Drawer } from "../components/Drawer";
 import { SkeletonCard } from "../components/Skeleton";
+import { PlusIcon } from "../components/icons";
 
 type CourierRow = Courier & {
   status: "Sahada" | "Müsait" | "Pasif";
@@ -28,6 +30,7 @@ export function Couriers() {
   const [assignments, setAssignments] = useState<AssignmentView[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<CourierRow | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -56,6 +59,7 @@ export function Couriers() {
       setName("");
       setPhone("");
       setPassword("");
+      setAddOpen(false);
       showToast("Kurye başarıyla eklendi.");
       load();
     } catch {
@@ -124,34 +128,14 @@ export function Couriers() {
 
   return (
     <div>
-      <h2>Kuryeler</h2>
-
-      {canManage && (
-        <Card title="Yeni Kurye Ekle">
-          <form onSubmit={handleSubmit}>
-            <div className="item-row">
-              <div className="grow">
-                <label>Ad Soyad</label>
-                <input value={name} onChange={(e) => setName(e.target.value)} required />
-              </div>
-              <div className="grow">
-                <label>Telefon</label>
-                <input value={phone} onChange={(e) => setPhone(e.target.value)} required />
-              </div>
-              <div className="grow">
-                <label>Mobil Uygulama Şifresi</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={4} required />
-              </div>
-            </div>
-            {error && <div className="error-text">{error}</div>}
-            <div className="actions">
-              <Button type="submit" loading={submitting}>
-                Ekle
-              </Button>
-            </div>
-          </form>
-        </Card>
-      )}
+      <div className="dashboard-header">
+        <h2 style={{ margin: 0 }}>Kuryeler</h2>
+        {canManage && (
+          <Button onClick={() => setAddOpen(true)} icon={<PlusIcon size={15} />}>
+            Kurye Ekle
+          </Button>
+        )}
+      </div>
 
       <Card>
         <DataTable
@@ -164,6 +148,23 @@ export function Couriers() {
           onRowClick={setSelected}
         />
       </Card>
+
+      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Yeni Kurye Ekle" width={480}>
+        <form onSubmit={handleSubmit}>
+          <label>Ad Soyad</label>
+          <input value={name} onChange={(e) => setName(e.target.value)} required />
+          <label>Telefon</label>
+          <input value={phone} onChange={(e) => setPhone(e.target.value)} required />
+          <label>Mobil Uygulama Şifresi</label>
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={4} required />
+          {error && <div className="error-text">{error}</div>}
+          <div className="actions">
+            <Button type="submit" loading={submitting}>
+              Kuryeyi Kaydet
+            </Button>
+          </div>
+        </form>
+      </Modal>
 
       <Drawer open={!!selected} onClose={() => setSelected(null)} title={selected?.name ?? ""}>
         {selected && (

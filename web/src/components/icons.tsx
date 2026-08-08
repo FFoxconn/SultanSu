@@ -265,3 +265,22 @@ export function LogOutIcon({ size = 16, className }: IconProps) {
     </svg>
   );
 }
+
+export function MoreIcon({ size = 17, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} fill="currentColor">
+      <circle cx="12" cy="5.5" r="1.9" />
+      <circle cx="12" cy="12" r="1.9" />
+      <circle cx="12" cy="18.5" r="1.9" />
+    </svg>
+  );
+}
+
+export function EditIcon({ size = 15, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} {...base}>
+      <path d="M15.5 4.5 19.5 8.5 8 20H4v-4Z" />
+      <path d="M13.5 6.5l4 4" />
+    </svg>
+  );
+}

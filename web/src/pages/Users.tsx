@@ -6,7 +6,9 @@ import { hasPermission, ROLE_LABELS } from "../lib/permissions";
 import { Card } from "../components/Card";
 import { Button } from "../components/Button";
 import { Badge, type BadgeVariant } from "../components/Badge";
+import { Modal } from "../components/Modal";
 import { DataTable, type Column } from "../components/DataTable";
+import { PlusIcon } from "../components/icons";
 
 const ROLE_BADGE: Record<Role, BadgeVariant> = {
   OWNER: "info",
@@ -24,6 +26,7 @@ export function Users() {
 
   const [users, setUsers] = useState<AppUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [addOpen, setAddOpen] = useState(false);
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -52,6 +55,7 @@ export function Users() {
       setPhone("");
       setPassword("");
       setRole("COURIER");
+      setAddOpen(false);
       showToast("Kullanıcı başarıyla oluşturuldu.");
       load();
     } catch {
@@ -82,46 +86,14 @@ export function Users() {
 
   return (
     <div>
-      <h2>Kullanıcılar</h2>
-
-      {canManage && (
-        <Card title="Yeni Kullanıcı Ekle">
-          <form onSubmit={handleSubmit}>
-            <div className="item-row">
-              <div className="grow">
-                <label>Ad Soyad</label>
-                <input value={name} onChange={(e) => setName(e.target.value)} required />
-              </div>
-              <div className="grow">
-                <label>Telefon</label>
-                <input value={phone} onChange={(e) => setPhone(e.target.value)} required />
-              </div>
-            </div>
-            <div className="item-row">
-              <div className="grow">
-                <label>Şifre</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={4} required />
-              </div>
-              <div>
-                <label>Rol</label>
-                <select value={role} onChange={(e) => setRole(e.target.value as Role)} style={{ minWidth: 160 }}>
-                  {ASSIGNABLE_ROLES.map((r) => (
-                    <option key={r} value={r}>
-                      {ROLE_LABELS[r]}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            {error && <div className="error-text">{error}</div>}
-            <div className="actions">
-              <Button type="submit" loading={submitting}>
-                Ekle
-              </Button>
-            </div>
-          </form>
-        </Card>
-      )}
+      <div className="dashboard-header">
+        <h2 style={{ margin: 0 }}>Kullanıcılar</h2>
+        {canManage && (
+          <Button onClick={() => setAddOpen(true)} icon={<PlusIcon size={15} />}>
+            Kullanıcı Ekle
+          </Button>
+        )}
+      </div>
 
       <Card>
         <DataTable
@@ -134,6 +106,31 @@ export function Users() {
           emptyMessage="Henüz kullanıcı yok."
         />
       </Card>
+
+      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Yeni Kullanıcı Ekle" width={480}>
+        <form onSubmit={handleSubmit}>
+          <label>Ad Soyad</label>
+          <input value={name} onChange={(e) => setName(e.target.value)} required />
+          <label>Telefon</label>
+          <input value={phone} onChange={(e) => setPhone(e.target.value)} required />
+          <label>Şifre</label>
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={4} required />
+          <label>Rol</label>
+          <select value={role} onChange={(e) => setRole(e.target.value as Role)}>
+            {ASSIGNABLE_ROLES.map((r) => (
+              <option key={r} value={r}>
+                {ROLE_LABELS[r]}
+              </option>
+            ))}
+          </select>
+          {error && <div className="error-text">{error}</div>}
+          <div className="actions">
+            <Button type="submit" loading={submitting}>
+              Kullanıcıyı Kaydet
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
