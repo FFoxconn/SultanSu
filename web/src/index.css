@@ -1827,3 +1827,11 @@ form .actions {
     grid-template-columns: 1fr;
   }
 }
+
+.dashboard-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}

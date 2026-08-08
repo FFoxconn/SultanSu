@@ -236,6 +236,27 @@ export function RotateIcon({ size = 16, className }: IconProps) {
   );
 }
 
+export function WalletIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} {...base}>
+      <path d="M3.5 7.5A2 2 0 0 1 5.5 5.5h12a2 2 0 0 1 2 2V9" />
+      <rect x="2.5" y="9" width="19" height="11.5" rx="2" />
+      <path d="M16.5 14.75a1 1 0 1 0 0-.02" />
+    </svg>
+  );
+}
+
+export function RefreshIcon({ size = 16, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} {...base}>
+      <path d="M20 11A8 8 0 0 0 6.3 6.3L4 8.5" />
+      <path d="M4 4v4.5h4.5" />
+      <path d="M4 13a8 8 0 0 0 13.7 4.7L20 15.5" />
+      <path d="M20 20v-4.5h-4.5" />
+    </svg>
+  );
+}
+
 export function LogOutIcon({ size = 16, className }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" className={className} {...base}>
