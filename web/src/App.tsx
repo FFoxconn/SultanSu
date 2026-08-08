@@ -13,9 +13,10 @@ import { Assignments } from "./pages/Assignments";
 import { AssignmentDetail } from "./pages/AssignmentDetail";
 import { Reports } from "./pages/Reports";
 
-function RequireOwner({ children }: { children: ReactNode }) {
+function RequireStaff({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  if (!user || user.role !== "OWNER") return <Navigate to="/login" replace />;
+  // Web paneli Patron/Yönetici/Depo rollerine açık; Kurye rolü sadece mobil uygulamayı kullanır.
+  if (!user || user.role === "COURIER") return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
 
@@ -36,9 +37,9 @@ export default function App() {
       <Route
         path="/"
         element={
-          <RequireOwner>
+          <RequireStaff>
             <Layout />
-          </RequireOwner>
+          </RequireStaff>
         }
       >
         <Route index element={<Dashboard />} />
