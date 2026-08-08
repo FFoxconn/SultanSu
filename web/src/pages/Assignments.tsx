@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { api, type AssignmentView } from "../api/client";
+import { Card } from "../components/Card";
+import { DataTable, type Column } from "../components/DataTable";
 
 export function Assignments() {
+  const navigate = useNavigate();
   const [assignments, setAssignments] = useState<AssignmentView[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -13,47 +16,47 @@ export function Assignments() {
       .finally(() => setLoading(false));
   }, []);
 
+  const columns: Column<AssignmentView>[] = [
+    { key: "courier", header: "Kurye", render: (a) => a.courier.name, csvValue: (a) => a.courier.name, sortValue: (a) => a.courier.name },
+    {
+      key: "status",
+      header: "Durum",
+      render: (a) => <span className={`badge ${a.status === "OPEN" ? "open" : "closed"}`}>{a.status === "OPEN" ? "Sahada" : "Kapandı"}</span>,
+      csvValue: (a) => (a.status === "OPEN" ? "Sahada" : "Kapandı"),
+    },
+    {
+      key: "createdAt",
+      header: "Oluşturulma",
+      render: (a) => new Date(a.createdAt).toLocaleString("tr-TR"),
+      csvValue: (a) => new Date(a.createdAt).toLocaleString("tr-TR"),
+      sortValue: (a) => new Date(a.createdAt).getTime(),
+    },
+    { key: "items", header: "Ürün Sayısı", render: (a) => a.items.length, csvValue: (a) => a.items.length, align: "right" },
+    {
+      key: "totalSalesAmount",
+      header: "Ciro",
+      render: (a) => `${a.totalSalesAmount.toLocaleString("tr-TR")} ₺`,
+      csvValue: (a) => a.totalSalesAmount,
+      sortValue: (a) => a.totalSalesAmount,
+      align: "right",
+    },
+  ];
+
   return (
     <div>
       <h2>Zimmetler</h2>
-      <div className="card">
-        {loading ? (
-          <p className="muted">Yükleniyor...</p>
-        ) : assignments.length === 0 ? (
-          <p className="empty-state">Henüz zimmet oluşturulmadı.</p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Kurye</th>
-                <th>Durum</th>
-                <th>Oluşturulma</th>
-                <th>Ürün Sayısı</th>
-                <th>Ciro</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {assignments.map((a) => (
-                <tr key={a.id}>
-                  <td>{a.courier.name}</td>
-                  <td>
-                    <span className={`badge ${a.status === "OPEN" ? "open" : "closed"}`}>
-                      {a.status === "OPEN" ? "Sahada" : "Kapandı"}
-                    </span>
-                  </td>
-                  <td>{new Date(a.createdAt).toLocaleString("tr-TR")}</td>
-                  <td>{a.items.length}</td>
-                  <td>{a.totalSalesAmount.toLocaleString("tr-TR")} ₺</td>
-                  <td>
-                    <Link to={`/zimmetler/${a.id}`}>Detay</Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+      <Card>
+        <DataTable
+          columns={columns}
+          data={assignments}
+          rowKey={(a) => a.id}
+          loading={loading}
+          searchPlaceholder="Kurye ara..."
+          exportFilename="zimmetler"
+          emptyMessage="Henüz zimmet oluşturulmadı."
+          onRowClick={(a) => navigate(`/zimmetler/${a.id}`)}
+        />
+      </Card>
     </div>
   );
 }
