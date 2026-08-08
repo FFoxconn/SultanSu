@@ -246,6 +246,18 @@ select {
   color: var(--text);
 }
 
+/* Tarayıcının otomatik doldurma (autofill) mavi/sarı arka planını ezip
+   input'ların her zaman beyaz görünmesini sağlar. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--text);
+  -webkit-box-shadow: 0 0 0 1000px #fff inset;
+  box-shadow: 0 0 0 1000px #fff inset;
+  transition: background-color 999999s ease-in-out 0s;
+}
+
 label {
   display: block;
   font-size: 0.82rem;
@@ -487,6 +499,11 @@ form .actions {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(29, 111, 214, 0.12);
+}
+
+.login-box form input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #fff inset, 0 0 0 3px rgba(29, 111, 214, 0.12);
+  box-shadow: 0 0 0 1000px #fff inset, 0 0 0 3px rgba(29, 111, 214, 0.12);
 }
 
 .login-box__row {
