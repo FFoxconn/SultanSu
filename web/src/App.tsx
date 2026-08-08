@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import { Layout } from "./components/Layout";
+import { WaterLoader } from "./components/WaterLoader";
 import { Login } from "./pages/Login";
 import { Dashboard } from "./pages/Dashboard";
 import { Products } from "./pages/Products";
@@ -13,13 +14,22 @@ import { AssignmentDetail } from "./pages/AssignmentDetail";
 import { Reports } from "./pages/Reports";
 
 function RequireOwner({ children }: { children: ReactNode }) {
-  const { user, loading } = useAuth();
-  if (loading) return <p style={{ padding: 24 }}>Yükleniyor...</p>;
+  const { user } = useAuth();
   if (!user || user.role !== "OWNER") return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
 
 export default function App() {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="app-loading-screen">
+        <WaterLoader size="full" label="SultanSu yükleniyor..." />
+      </div>
+    );
+  }
+
   return (
     <Routes>
       <Route path="/login" element={<Login />} />

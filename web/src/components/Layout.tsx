@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { LogoMark } from "./LogoMark";
 
 const links = [
   { to: "/", label: "Panel", end: true },
@@ -17,7 +18,10 @@ export function Layout() {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <h1>SultanSu</h1>
+        <div className="sidebar__brand">
+          <LogoMark size={26} />
+          <h1>SultanSu</h1>
+        </div>
         <div className="subtitle">Bayi Yönetim Paneli</div>
         <nav>
           {links.map((link) => (
