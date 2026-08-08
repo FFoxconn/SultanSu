@@ -11,17 +11,18 @@ geçmişi (audit log) içeren kurumsal bir ERP/SaaS deneyimi sunar.
 ```
 backend/   Express + TypeScript + Prisma (SQLite, dev) — REST API + RBAC + audit log
 web/       React + Vite — Patron/Yönetici/Depo yönetim paneli (recharts, DataTable, vb.)
-mobile/    Expo (React Native) — Kurye mobil uygulaması
+mobile/    Flutter (Dart) — Kurye mobil uygulaması
 ```
 
 ## Kurulum
 
-Her paket kendi `node_modules`'una sahiptir (npm workspaces).
+`backend` ve `web` npm workspaces olarak tek `npm install` ile kurulur; `mobile`
+ayrı bir Flutter projesidir (npm workspace'i değildir), kendi bölümünde anlatılan
+`flutter pub get` ile kurulur.
 
 ```bash
 cd backend && npm install
 cd ../web && npm install
-cd ../mobile && npm install
 ```
 
 ### Backend
@@ -61,14 +62,35 @@ cd web
 npm run dev   # http://localhost:5173 — backend'e /api üzerinden proxy yapar
 ```
 
-### Mobil uygulama (Kurye)
+### Mobil uygulama (Kurye) — Flutter
+
+Flutter SDK gerekir (kurulu değilse: https://docs.flutter.dev/get-started/install/windows).
 
 ```bash
 cd mobile
-npx expo start --web   # tarayıcıda test (bu ortamda native simülatör yok)
-# Telefonda gerçek testte: src/api/client.ts içindeki API_URL'i
-# bilgisayarınızın yerel ağ IP'sine göre güncelleyin (localhost telefonu göstermez).
+flutter pub get
+flutter doctor        # Android toolchain/telefon algılanıyor mu kontrol edin
 ```
+
+**Android telefonu USB ile bağlayıp çalıştırma:**
+
+1. Telefonda Ayarlar → Telefon Hakkında → "Yapı Numarası"na 7 kez dokunup
+   Geliştirici Seçenekleri'ni açın, ardından "USB Hata Ayıklama"yı etkinleştirin.
+2. Telefonu USB ile bağlayın, çıkan "USB hata ayıklamaya izin ver?" uyarısını onaylayın.
+3. `adb devices` ile telefonun `device` olarak göründüğünü doğrulayın (adb yoksa
+   [platform-tools](https://developer.android.com/tools/releases/platform-tools) indirin).
+4. Backend'i çalışır durumda bırakıp şu tüneli açın (telefondaki `localhost`'u
+   bilgisayardaki backend'e yönlendirir, `mobile` kodunda IP değiştirmeye gerek kalmaz):
+   ```bash
+   adb reverse tcp:4000 tcp:4000
+   ```
+5. `flutter run` çalıştırın (birden fazla cihaz varsa `-d <device-id>` ile seçin).
+
+Kurye giriş bilgileri: `5550000002` / `kurye123`.
+
+Not: `mobile/lib/api/api_client.dart` içindeki `apiBaseUrl` sabiti Wi-Fi üzerinden
+test ederken bilgisayarınızın yerel ağ IP'siyle güncellenmeli (ör.
+`http://192.168.1.20:4000/api`) — USB + `adb reverse` akışında `localhost` olarak kalabilir.
 
 ## İş akışı
 
