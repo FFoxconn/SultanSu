@@ -14,7 +14,7 @@ returnsRouter.get(
   requireAuth,
   requirePermission("return.view"),
   asyncHandler(async (req, res) => {
-    const { date, courierId, productId } = req.query as Record<string, string | undefined>;
+    const { date, from, to, courierId, productId } = req.query as Record<string, string | undefined>;
 
     const where: Record<string, unknown> = {
       quantityReturned: { gt: 0 },
@@ -30,12 +30,20 @@ returnsRouter.get(
           lte: new Date(`${date}T23:59:59.999`),
         },
       };
+    } else if (from || to) {
+      where.assignment = {
+        ...(where.assignment as object),
+        closedAt: {
+          ...(from ? { gte: new Date(`${from}T00:00:00`) } : {}),
+          ...(to ? { lte: new Date(`${to}T23:59:59.999`) } : {}),
+        },
+      };
     }
 
     const items = await prisma.assignmentItem.findMany({
       where,
       orderBy: { assignment: { closedAt: "desc" } },
-      take: 500,
+      take: from || to ? 2000 : 500,
       include: {
         product: { select: { id: true, name: true, unit: true } },
         assignment: {

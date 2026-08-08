@@ -15,15 +15,7 @@ import { ChartCard } from "../components/ChartCard";
 import { DataTable, type Column } from "../components/DataTable";
 import { SalesTrendChart, StockStatusBar, CourierPerformanceBarChart } from "../components/charts";
 import { Badge } from "../components/Badge";
-
-function todayStr() {
-  return new Date().toISOString().slice(0, 10);
-}
-function daysAgoStr(n: number) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return d.toISOString().slice(0, 10);
-}
+import { DateRangeFilter, daysAgoStr, todayStr } from "../components/DateRangeFilter";
 
 const TABS = ["Genel", "Satış", "Stok", "Zimmet", "Performans"] as const;
 type Tab = (typeof TABS)[number];
@@ -390,27 +382,3 @@ function PerformanceTab() {
   );
 }
 
-function DateRangeFilter({
-  from,
-  to,
-  onFrom,
-  onTo,
-}: {
-  from: string;
-  to: string;
-  onFrom: (v: string) => void;
-  onTo: (v: string) => void;
-}) {
-  return (
-    <div className="filter-bar">
-      <div className="field">
-        <label>Başlangıç</label>
-        <input type="date" value={from} onChange={(e) => onFrom(e.target.value)} />
-      </div>
-      <div className="field">
-        <label>Bitiş</label>
-        <input type="date" value={to} onChange={(e) => onTo(e.target.value)} />
-      </div>
-    </div>
-  );
-}

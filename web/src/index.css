@@ -1835,3 +1835,85 @@ form .actions {
   gap: 16px;
   flex-wrap: wrap;
 }
+
+/* Stepper */
+
+.stepper {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.stepper__step {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+.stepper__step:last-child {
+  flex: 0 0 auto;
+}
+
+.stepper__circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  background: var(--bg);
+  color: var(--text-muted);
+  border: 2px solid var(--border);
+}
+
+.stepper__label {
+  margin-left: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.stepper__line {
+  flex: 1;
+  height: 2px;
+  background: var(--border);
+  margin: 0 14px;
+}
+
+.stepper__step--done .stepper__circle {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+}
+
+.stepper__step--done .stepper__label {
+  color: var(--text);
+}
+
+.stepper__step--done .stepper__line {
+  background: var(--success);
+}
+
+.stepper__step--active .stepper__circle {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.stepper__step--active .stepper__label {
+  color: var(--text);
+}
+
+@media (max-width: 700px) {
+  .stepper__label {
+    display: none;
+  }
+  .stepper__line {
+    margin: 0 6px;
+  }
+}

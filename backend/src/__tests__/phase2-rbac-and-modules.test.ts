@@ -166,4 +166,27 @@ describe("Faz 2 — RBAC ve yeni modüller", () => {
     expect(list.status).toBe(200);
     expect(list.body.some((u: { phone: string }) => u.phone === "5551110099")).toBe(true);
   });
+
+  it("/api/sales ve /api/returns tarih aralığı (from/to) ile filtrelenebilir", async () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+
+    const salesInRange = await request(app)
+      .get(`/api/sales?from=${today}&to=${tomorrow}`)
+      .set("Authorization", `Bearer ${ownerToken}`);
+    expect(salesInRange.status).toBe(200);
+    expect(salesInRange.body.length).toBeGreaterThan(0);
+
+    const salesOutOfRange = await request(app)
+      .get(`/api/sales?from=2000-01-01&to=2000-01-02`)
+      .set("Authorization", `Bearer ${ownerToken}`);
+    expect(salesOutOfRange.body.length).toBe(0);
+
+    const returnsInRange = await request(app)
+      .get(`/api/returns?from=${yesterday}&to=${tomorrow}`)
+      .set("Authorization", `Bearer ${ownerToken}`);
+    expect(returnsInRange.status).toBe(200);
+    expect(returnsInRange.body.length).toBeGreaterThan(0);
+  });
 });

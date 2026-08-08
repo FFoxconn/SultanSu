@@ -10,7 +10,7 @@ salesRouter.get(
   requireAuth,
   requirePermission("sale.view"),
   asyncHandler(async (req, res) => {
-    const { date, courierId, productId } = req.query as Record<string, string | undefined>;
+    const { date, from, to, courierId, productId } = req.query as Record<string, string | undefined>;
 
     const where: Record<string, unknown> = {};
     if (courierId) where.courierId = courierId;
@@ -20,12 +20,17 @@ salesRouter.get(
         gte: new Date(`${date}T00:00:00`),
         lte: new Date(`${date}T23:59:59.999`),
       };
+    } else if (from || to) {
+      where.createdAt = {
+        ...(from ? { gte: new Date(`${from}T00:00:00`) } : {}),
+        ...(to ? { lte: new Date(`${to}T23:59:59.999`) } : {}),
+      };
     }
 
     const sales = await prisma.sale.findMany({
       where,
       orderBy: { createdAt: "desc" },
-      take: 500,
+      take: from || to ? 2000 : 500,
       include: {
         product: { select: { id: true, name: true, unit: true } },
         courier: { select: { id: true, name: true } },

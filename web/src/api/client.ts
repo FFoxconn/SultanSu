@@ -309,8 +309,10 @@ export const api = {
   closeAssignment: (assignmentId: string) =>
     request<AssignmentView>(`/assignments/${assignmentId}/close`, { method: "POST" }),
 
-  sales: (params?: { date?: string; courierId?: string; productId?: string }) => request<SaleRecord[]>(`/sales${qs(params)}`),
-  returns: (params?: { date?: string; courierId?: string; productId?: string }) => request<ReturnRecord[]>(`/returns${qs(params)}`),
+  sales: (params?: { date?: string; from?: string; to?: string; courierId?: string; productId?: string }) =>
+    request<SaleRecord[]>(`/sales${qs(params)}`),
+  returns: (params?: { date?: string; from?: string; to?: string; courierId?: string; productId?: string }) =>
+    request<ReturnRecord[]>(`/returns${qs(params)}`),
 
   auditLogs: (params?: { limit?: string }) => request<AuditLogEntry[]>(`/audit-logs${qs(params)}`),
 

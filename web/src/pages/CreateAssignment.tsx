@@ -1,17 +1,23 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { api, type Courier, type StockItem } from "../api/client";
+import { api, type Courier, type DashboardSummary, type StockItem } from "../api/client";
 import { useToast } from "../context/ToastContext";
 import { Card } from "../components/Card";
 import { Button } from "../components/Button";
+import { StatCard } from "../components/StatCard";
+import { Stepper } from "../components/Stepper";
+import { PackageIcon, TruckIcon, ClipboardIcon } from "../components/icons";
 
 type Row = { productId: string; quantity: string };
+
+const STEPS = ["Kurye Seç", "Ürün ve Miktar", "Onayla ve Oluştur"];
 
 export function CreateAssignment() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [couriers, setCouriers] = useState<Courier[]>([]);
   const [stock, setStock] = useState<StockItem[]>([]);
+  const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [courierId, setCourierId] = useState("");
   const [rows, setRows] = useState<Row[]>([{ productId: "", quantity: "" }]);
   const [error, setError] = useState<string | null>(null);
@@ -20,6 +26,7 @@ export function CreateAssignment() {
   useEffect(() => {
     api.couriers().then(setCouriers);
     api.stock().then(setStock);
+    api.dashboardSummary().then(setSummary).catch(() => {});
   }, []);
 
   function updateRow(index: number, patch: Partial<Row>) {
@@ -40,6 +47,9 @@ export function CreateAssignment() {
   const summaryRows = rows
     .filter((r) => r.productId && Number(r.quantity) > 0)
     .map((r) => ({ row: r, item: stockByProduct.get(r.productId) }));
+
+  const activeStep = !courierId ? 0 : summaryRows.length === 0 ? 1 : 2;
+  const totalStock = stock.reduce((sum, s) => sum + s.quantity, 0);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -88,9 +98,17 @@ export function CreateAssignment() {
       <h2>Zimmet Oluştur</h2>
       <p className="muted">Kuryeye teslim edeceğiniz ürün ve miktarları girin. Onaylandığında depo stoğundan otomatik düşülür.</p>
 
+      <div className="stat-row">
+        <StatCard icon={<TruckIcon size={19} />} label="Aktif Kurye (Sahada)" value={summary?.kpis.activeCourierCount ?? "-"} />
+        <StatCard icon={<ClipboardIcon size={19} />} label="Bugün Açılan Zimmet" value={summary?.kpis.assignedToday ?? "-"} />
+        <StatCard icon={<PackageIcon size={19} />} label="Depo Toplam Stok" value={totalStock} />
+      </div>
+
       <Card>
+        <Stepper steps={STEPS} activeIndex={activeStep} />
+
         <form onSubmit={handleSubmit}>
-          <label>1. Kurye Seçin</label>
+          <label>Kurye</label>
           <select value={courierId} onChange={(e) => setCourierId(e.target.value)} required>
             <option value="">Kurye seçin</option>
             {couriers.map((c) => (
@@ -100,7 +118,7 @@ export function CreateAssignment() {
             ))}
           </select>
 
-          <label>2. Ürün ve Miktar</label>
+          <label>Ürün ve Miktar</label>
           {rows.map((row, index) => {
             const item = stockByProduct.get(row.productId);
             return (
@@ -140,7 +158,7 @@ export function CreateAssignment() {
 
           {summaryRows.length > 0 && (
             <div style={{ marginTop: 20 }}>
-              <label>3. Özet</label>
+              <label>Özet</label>
               <table>
                 <thead>
                   <tr>
@@ -167,7 +185,7 @@ export function CreateAssignment() {
           {error && <div className="error-text">{error}</div>}
           <div className="actions">
             <Button type="submit" loading={submitting}>
-              4. Zimmeti Onayla ve Oluştur
+              Zimmeti Onayla ve Oluştur
             </Button>
           </div>
         </form>

@@ -127,6 +127,24 @@ export function CourierPerformanceBarChart({ couriers }: { couriers: CourierPerf
   );
 }
 
+export function ReturnsByProductBar({ data }: { data: Array<{ name: string; quantity: number }> }) {
+  if (data.length === 0) {
+    return <ChartEmpty text="Bu aralıkta iade yok." />;
+  }
+  const sorted = [...data].sort((a, b) => b.quantity - a.quantity).slice(0, 8);
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart data={sorted} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#eef1f4" vertical={false} />
+        <XAxis dataKey="name" tick={{ fontSize: 11.5, fill: COLORS.muted }} axisLine={false} tickLine={false} interval={0} angle={-14} textAnchor="end" height={46} />
+        <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: COLORS.muted }} axisLine={false} tickLine={false} width={40} />
+        <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid #e2e5e9", fontSize: 12.5 }} formatter={(v) => [String(v), "İade Adedi"]} />
+        <Bar dataKey="quantity" name="İade Adedi" fill={COLORS.warning} radius={[6, 6, 0, 0]} />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
 function ChartEmpty({ text }: { text: string }) {
   return (
     <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)", fontSize: "0.85rem" }}>
