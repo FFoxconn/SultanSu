@@ -4,7 +4,7 @@ import { api, getToken, setToken, type AuthUser } from "../api/client";
 type AuthContextValue = {
   user: AuthUser | null;
   loading: boolean;
-  login: (phone: string, password: string) => Promise<void>;
+  login: (phone: string, password: string, remember?: boolean) => Promise<void>;
   logout: () => void;
 };
 
@@ -26,9 +26,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setLoading(false));
   }, []);
 
-  async function login(phone: string, password: string) {
+  async function login(phone: string, password: string, remember = true) {
     const { token, user } = await api.login(phone, password);
-    setToken(token);
+    setToken(token, remember);
     setUser(user);
   }
 

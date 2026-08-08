@@ -86,13 +86,18 @@ export type DailyReport = {
 
 const TOKEN_KEY = "sultansu_token";
 
+// "Beni Hatırla" işaretliyse token localStorage'da (tarayıcı kapansa da kalıcı),
+// işaretli değilse sessionStorage'da (sekme kapanınca silinir) tutulur.
 export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
+  return localStorage.getItem(TOKEN_KEY) ?? sessionStorage.getItem(TOKEN_KEY);
 }
 
-export function setToken(token: string | null) {
-  if (token) localStorage.setItem(TOKEN_KEY, token);
-  else localStorage.removeItem(TOKEN_KEY);
+export function setToken(token: string | null, remember: boolean = true) {
+  localStorage.removeItem(TOKEN_KEY);
+  sessionStorage.removeItem(TOKEN_KEY);
+  if (token) {
+    (remember ? localStorage : sessionStorage).setItem(TOKEN_KEY, token);
+  }
 }
 
 class ApiError extends Error {
